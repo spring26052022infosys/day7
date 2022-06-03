@@ -291,13 +291,14 @@ public class StudentServiceImpl implements StudentService {
 
 	@Override
 	public StudentDTO getStudent(Integer roll) throws StudentException {
-	Student student=studentRepository.findById(roll).get();
+	//Student student=studentRepository.findById(roll).get();
+	Optional<Student> student=studentRepository.findById(roll);
+	Student st=student.orElseThrow(()->new StudentException("Not found"));
 	StudentDTO studentDTO=new StudentDTO();
-	studentDTO.setRoll(student.getRoll());
-	studentDTO.setName(student.getName());
-	studentDTO.setMarks(student.getMarks());
+	studentDTO.setRoll(st.getRoll());
+	studentDTO.setName(st.getName());
+	studentDTO.setMarks(st.getMarks());
 	return studentDTO;
-	
 	}
 }
 -----------------------------------------------------------------------------------------
