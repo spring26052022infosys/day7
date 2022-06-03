@@ -1,3 +1,15 @@
+
+drop database if exists studentdb;
+create database studentdb ;
+use studentdb;
+create table student(
+roll integer auto_increment primary key,
+name varchar(20),
+marks integer);
+
+
+
+
 * Building REST APIs with Spring Boot
 --------------------------------------------------
 <?xml version="1.0" encoding="UTF-8"?>
@@ -224,8 +236,8 @@ import com.example.demo1.exceptions.StudentException;
 public interface StudentService {
  void addStudent(StudentDTO studentDTO) throws StudentException;
  StudentDTO getStudent(Integer roll) throws StudentException;    
-	   
-   
+ void updateStudent(Integer roll, Integer marks) throws StudentException;    	   
+ void deleteStudent(Integer roll) throws StudentException; 
 }
 
 --------------------------------------------------------------------------------------------------------
@@ -271,6 +283,22 @@ public class StudentServiceImpl implements StudentService {
 	return studentDTO;
 	
 	}
+      
+       @Override
+	public void updateStudent(Integer roll, Integer marks) throws StudentException {
+		Optional<Student> optional = studentRepository.findById(roll);
+		Student student = optional.orElseThrow(() -> new StudentException("Student not found"));
+		student.setMarks(marks);
+	}
+
+      @Override
+	public void deleteStudent(Integer roll) throws StudentException {
+		Optional<Student> optional = studentRepository.findById(roll);
+		optional.orElseThrow(() -> new StudentException("Student not found"));
+		studentRepository.deleteById(roll);
+	}
+
+
 }
 -----------------------------------------------------------------------------------------
 package com.example.demo1.controller;
@@ -322,6 +350,29 @@ public class StudentAPI {
 			}
 	       return new ResponseEntity<>(studentDTO,HttpStatus.OK);
 	    }
+
+         // http://localhost:8080/students/updateStudent/11	   
+	 @PutMapping(value = "/updatestudent/{roll}")
+         public ResponseEntity<String> updateStudent(@PathVariable Integer roll, @RequestBody StudentDTO student)
+	
+				throws StudentException {
+			studentService.updateStudent(roll, student.getMarks());
+			String successMessage = "Updated";
+			return new ResponseEntity<>(successMessage, HttpStatus.OK);
+		}
+
+          // http://localhost:8080/students/deletestudent/11	
+      	 @DeleteMapping(value = "/deletestudent/{roll}")
+         public ResponseEntity<String> deleteStudent(@PathVariable Integer roll)
+	
+				throws StudentException {
+			studentService.deleteStudent(roll);
+			String successMessage = "Deleted";
+			return new ResponseEntity<>(successMessage, HttpStatus.OK);
+		}
+
+
+
 }
 
 
